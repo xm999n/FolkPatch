@@ -48,10 +48,15 @@ android {
             vcsInfo.include = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-debuginfo-remove.pro",
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "NONE"
+            }
         }
     }
+
 
     dependenciesInfo.includeInApk = false
 
@@ -79,15 +84,38 @@ android {
     }
 
     packaging {
+        resources {
+        merges += "META-INF/MANIFEST.MF"  
+        merges += "META-INF/ALIAS_AP.SF"  
+        merges += "META-INF/ALIAS_AP.RSA"  
+        merges += "META-INF/com/google/android/**"  
+        excludes += "kotlin/**"  
+        excludes += "okhttp3/**"  
+        excludes += "org/**"  
+        excludes += "DebugProbesKt.bin"  
+        excludes += "kotlin-tooling-metadata.json"  
+        excludes += "assets/dexopt/**"  
+        excludes += "META-INF/**"  
+        pickFirst("META-INF/MANIFEST.MF")  
+        pickFirst("META-INF/ALIAS_AP.SF")  
+        pickFirst("META-INF/ALIAS_AP.RSA")
+        }
         jniLibs {
             useLegacyPackaging = true
-        }
-        resources {
-            excludes += "**"
-            merges += "META-INF/com/google/android/**"
+            exclude("lib/armeabi-v7a/**")
+            exclude("lib/x86/**")
+            exclude("lib/x86_64/**")
+            exclude("lib/armeabi/**")
         }
     }
 
+    splits {
+        abi {
+            reset()
+            include("arm64-v8a")
+            isUniversalApk = false
+        }
+    }
     externalNativeBuild {
         cmake {
             version = "3.28.0+"
